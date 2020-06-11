@@ -1,9 +1,12 @@
+
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 3001;
+const cors = require('cors')
 const connection = require('./conf');
 var bodyParser = require('body-parser')
 
+app.use(cors())
 // Support JSON-encoded bodies
 app.use(express.json());
 // Support URL-encoded bodies
@@ -17,11 +20,32 @@ app.get('/api/enfantcadeau', (req, res) => {
         res.send(results);
     })
 });
+
+app.get('/api/lutincadeau', (req, res) => {
+    connection.query(`SELECT * from lutin AS lut JOIN cadeaux AS ca ON ca.ID = lut.cadeaux_ID `, (err, results) => {
+        if (err) throw err
+        res.send(results);
+    })
+});
+
+app.get('/api/cadeau', (req, res) => {
+    connection.query('SELECT * from cadeaux ', (err, results) => {
+        if (err) throw err
+        res.send(results);
+    })
+});
+
 app.get('/api/enfant', (req, res) => {
     connection.query('SELECT * from enfant ', (err, results) => {
         if (err) throw err
         res.send(results);
-    })
+    });
+});
+app.get('/api/lutin', (req, res) => {
+    connection.query('SELECT * from lutin ', (err, results) => {
+        if (err) throw err
+        res.send(results);
+    });
 });
 app.post('/api/cadeau', (req, res) => {
     const formData = req.body;
@@ -54,7 +78,28 @@ app.post('/api/cadeau', (req, res) => {
           }
         });
       });
+
+
+      app.put('/api/cadeau/:name/:status', (req, res) => {
+ 
+        // récupération des données envoyées
+        const nameCadeau = req.params.name;
+        const statusCadeau= req.params.status;
+       const formData = req.body;
+        // connexion à la base de données, et suppression de l'employé
+        connection.query('UPDATE cadeau set status=? where name= ?', [nameCadeau,statusCadeau ], err => {
        
+          if (err) {
+            // Si une erreur est survenue, alors on informe l'utilisateur de l'erreur
+            console.log(err);
+            res.status(500).send("Erreur lors de l Upadate du status ");
+          } else {
+       
+            // Si tout s'est bien passé, on envoie un statut "ok".
+            res.sendStatus(200);
+          }
+        });
+      });
 
 
 
